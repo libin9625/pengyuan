@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>注册页</title>
+    <link href="./login/style_log.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="./login/style.css">
+    <link rel="stylesheet" type="text/css" href="./login/userpanel.css">
+    <link rel="stylesheet" type="text/css" href="./login/jquery.ui.all.css">
+    <style>
+        .login_boder{
+            height:500px;
+            background-size: cover;
+        }
+        .login_m{
+            margin-top: 5%;
+        }
+        .login_padding{
+            padding: 20px 47px 20px 60px;
+        }
+        .btn{
+            width: 307px;
+            height: 30px;
+            border-radius: 8px;
+            border: 1px solid #cad2db;
+            padding-bottom: 2px;
+            font-size: 14px;
+            font-weight: bold
+        }
+        .get-code{
+            color: #FFF;
+            background-color: #6CB1EF;
+        }
+        .reset-code{
+            color: black;
+            background-color: none;
+        }
+    </style>
+</head>
+<body class="login" mycollectionplug="bind">
+    <div class="login_m">
+        <div class="login_logo">
+            <img src="./login/logo.png" width="196" height="46">
+        </div>
+        <form action="" method="post">
+            <div class="login_boder">
+                <div class="login_padding" id="login_model">
+                    <h2>邮箱</h2>
+                    <label>
+                        <input name="number" type="text" id="username" class="txt_input txt_input2" placeholder="您的邮箱">
+                    </label>
+                    <h2>验证码</h2>
+                    <label>
+                        <div class="controls">
+                            <input type="text" id="code" class="txt_input txt_input2">
+                            <button type="button" class="btn get-code" id="getCode">获取验证码</button>
+                            <button type="button" class="btn reset-code" id="resetCode" style="display:none;"><span id="second">60</span>秒后重发</button>
+                        </div>    
+                    </label>
+                    <h2>密码</h2>
+                    <label>
+                        <input name="password" type="password" id="userpwd" class="txt_input" placeholder="您的密码">
+                    </label>
+                    <h2>确认密码</h2>
+                    <label>
+                        <input name="passwordAgain" type="password" id="userpwdAgain" class="txt_input" placeholder="您的密码">
+                    </label>
+                    <p class="forgot"><a id="iforget" href="login.html">已经注册？点击这里进行登录</a></p>
+                    <div class="rem_sub">
+                        <label>
+                            <input type="button" class="sub_button" name="button" id="submit" value="注册" style="opacity: 0.7;">
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+<script src="./js/jquery-1.11.3.min.js"></script>
+<script src="./js/MsgBox.js"></script>
+<script>
+    $(function(){
+        //60秒倒计时
+        function time(){
+            $('#getCode').hide();
+            $('#second').html('60');
+            $('#resetCode').show();
+            var second = 60;
+            var timer = null;
+            timer = setInterval(function(){
+                second -= 1;
+                if(second >0 ){
+                    $('#second').html(second);
+                    $('#resetCode').attr('disabled','true');
+                }else{
+                    clearInterval(timer);
+                    $('#getCode').show();
+                    $('#resetCode').hide();
+                }
+            },1000);
+        }
+
+        //向邮箱发送链接
+        function sendMail(mail,rnum,t){		    
+			console.log(rnum);
+            $.ajax({
+                type:"get",
+                url:"http://test.pptlook.com/test/test31.php",
+				dataType:"text",
+                data:{
+				'm':mail,
+				'rn':rnum,
+				't':t
+				},
+                success:function(){
+                    console.log("success");
+                },
+                error:function(xhr,ajaxOptions,error){
+                    console.log("error");
+                }
+            })
+        }
+        //sendMail("1147156332@qq.com","1135677"，"r");//注册
+        //sendMail("1147156332@qq.com","1135677","s");//重置密码
+
+        var num="";
+        //获取验证码
+        $('#getCode').click(function(){
+            if($('#username').val()){
+                num = "";
+                for(var i=0;i<4;i++){  
+                    num+=Math.floor(Math.random()*10)  
+                }  
+                //链接向邮箱发送验证码
+                sendMail($('#username').val(),num,"s");//重置密码
+                time();
+            }
+        })
+
+        $('#code').blur(function(){
+            if($('#code').val() != num){
+                $('#code').css('border','solid 1px #FE2A2A');
+                $('#code').val("");
+                $('#code').attr('placeholder','验证码错误，请重新输入');
+            }else{
+                $('#code').css('border','1px solid #cad2db');
+            }
+        })
+
+        //验证邮箱
+        fChkMail=function(szMail){
+            var szReg=/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+            var bChk=szReg.test(szMail);
+            return bChk;
+        }
+        $('#username').blur(function(){
+            if(fChkMail($('#username').val()) == false){
+                $('#username').css('border','solid 1px #FE2A2A');
+            }else{
+                $('#username').css('border','1px solid #cad2db');
+            }
+        })
+
+        //确认两次密码输入一致
+        $('#userpwdAgain').blur(function(){
+            if($('#userpwd').val() != $('#userpwdAgain').val()){
+                $('#userpwdAgain').css('border','solid 1px #FE2A2A');
+                $('#userpwdAgain').val("");
+                $('#userpwdAgain').attr('placeholder','密码不一致，请重新确认密码');
+            }else{
+                $('#userpwdAgain').css('border','1px solid #cad2db');
+            }
+        })
+
+        //内容为空，阻止表单提交
+        $('#submit').click(function(){
+            if($('#username').val() == "" || $('#userpwd').val() == "" || $('#userpwdAgain').val() == ""){
+                $.MsgBox.Alert("错误提示", "注册信息不完整请确认后再次提交！");
+            }else if(fChkMail($('#username').val()) == false){
+                $.MsgBox.Alert("错误提示", "邮箱信息错误请确认后再次提交！");
+            }else{
+                //条件正确，链接数据库进行注册
+
+                //条件正确，跳转下载页面
+                sendMail($('#username').val(),num,"r");//注册
+                $(window).attr('location','./download.html'); 
+            }
+        })
+    })
+</script>
+</html>
