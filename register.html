@@ -102,10 +102,9 @@
 
         //向邮箱发送链接
         function sendMail(mail,rnum,t){		    
-			console.log(rnum);
             $.ajax({
                 type:"get",
-                url:"http://test.pptlook.com/test/test31.php",
+                url:"http://test.pptlook.com/test/sendm.php",
 				dataType:"text",
                 data:{
 				'm':mail,
@@ -113,10 +112,10 @@
 				't':t
 				},
                 success:function(){
-                    console.log("success");
+                    $.MsgBox.Alert("提示信息", "已向您的邮箱发送验证码，请注意查收！");
                 },
                 error:function(xhr,ajaxOptions,error){
-                    console.log("error");
+                    $.MsgBox.Alert("提示信息", "发生错误！");
                 }
             })
         }
@@ -172,6 +171,34 @@
             }
         })
 
+        //链接数据库保存数据
+        //    sendMail(mail);
+        function Register(mail,pword){
+            $.ajax({
+                type:"post",
+                url:"http://test.pptlook.com/test/register.php",
+                dataType:"text",
+                data:{
+                    'm':mail,
+                    'pw':pword
+                },
+                success:function(res){
+                    // console.log("success",res);
+                    if(res == " alreadyHave"){
+                        $.MsgBox.Alert("错误提示", "邮箱已被注册！");
+                    }else{
+                        $.MsgBox.Alert("提示信息", "注册成功！五秒后进行跳转");
+                        setTimeout(function () { 
+                            $(window).attr('location','./download.html');
+                        }, 5000);
+                    }
+                },
+                error:function(xhr,ajaxOptions,error){
+                    $.MsgBox.Alert("错误提示", "发生错误！");
+                }
+            })
+        }
+
         //内容为空，阻止表单提交
         $('#submit').click(function(){
             if($('#username').val() == "" || $('#userpwd').val() == "" || $('#userpwdAgain').val() == ""){
@@ -180,10 +207,8 @@
                 $.MsgBox.Alert("错误提示", "邮箱信息错误请确认后再次提交！");
             }else{
                 //条件正确，链接数据库进行注册
-
+                Register($('#username').val(),$('#userpwd').val());
                 //条件正确，跳转下载页面
-                sendMail($('#username').val(),num,"r");//注册
-                $(window).attr('location','./download.html'); 
             }
         })
     })
